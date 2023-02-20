@@ -61,6 +61,10 @@ binding.pry
 questions.reject! { |p| p['created'] < startdate }
 binding.pry
 
+"❓".codepoints.map { |cp| format('&#x%x;', cp) }.join
+# => "&#x2753;"
+# https://www.compart.com/en/unicode/search?q=question#characters
+# `emoj question`
 
 photos.each do |photo|
   id = photo['id']
