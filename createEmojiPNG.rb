@@ -18,7 +18,7 @@ logger = Logger.new($stderr)
 logger.level = Logger::DEBUG
 
 xml_entity = ARGV[0].codepoints.map { |cp| format('&#x%x;', cp) }.join
-filename_xml_entity = xml_entity.gsub(/[&#;]/, '')   
+filename_xml_entity = xml_entity.gsub(/[&#;]/, '')
 filename_emoji_readable = Unicode::Name.readable(ARGV[0]).gsub(' ', '-')
 filename = "#{filename_xml_entity}-#{filename_emoji_readable}.png"
 logger.debug "filename: #{filename}"
