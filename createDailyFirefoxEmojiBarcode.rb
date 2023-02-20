@@ -43,8 +43,9 @@ processed_ids = []
 processed_ids = IO.readlines(ID_FILEPATH).map(&:to_i) if File.exist?(ID_FILEPATH)
 
 # "https://raw.githubusercontent.com/rtanglao/rt-kits-api3/main/2023/2023-01-01-2023-01-01-firefox-creator-answers-desktop-all-locales.csv"
+# FIXME: what if CSV_URL doesn't exist?
 CSV_URL = format("https://raw.githubusercontent.com/rtanglao/rt-kits-api3/main/\
-#{localyyyy_str}/#{YYYY_MM_DD_YYYY_MM_DD}-firefox-creator-answers-desktop-all-locales.csv")
+#{utcyyyy_str}/#{YYYY_MM_DD_YYYY_MM_DD}-firefox-creator-answers-desktop-all-locales.csv")
 questions = []
 CSV.new(URI.parse(CSV_URL).open, :headers => :first_row).each do |q|
   q = q.to_hash
@@ -53,10 +54,11 @@ CSV.new(URI.parse(CSV_URL).open, :headers => :first_row).each do |q|
 end
 exit if questions.length.zero?
 questions.sort! { |a, b| a['created'] <=> b['created'] }
+binding.pry
+
 questions.reject! { |p| p['created'] < startdate }
 
 
-binding.pry
 
 # Get last photo and figure out the date for the Pacific timezone
 # and skip prior dates (if there are any)
