@@ -24,13 +24,12 @@ logger = Logger.new($stderr)
 logger.level = Logger::DEBUG
 
 PARAMS_TO_KEEP = %w[id created title content tags]
-tz = TZInfo::Timezone.get('America/Vancouver')
-localtime = tz.to_local(Time.now)
-localyyyy = localtime.strftime('%Y').to_i
-localyyyy_str = localtime.strftime('%Y')
-localmm = localtime.strftime('%m').to_i
-localdd = localtime.strftime('%d').to_i
-YYYYMMDD = format('%<yyyy>4.4d/%<mm>2.2d/%<dd>2.2d', yyyy: localyyyy, mm: localmm, dd: localdd)
+utctime = Time.now.utc
+utcyyyy = utctime.strftime('%Y').to_i
+utcyyyy_str = utctime.strftime('%Y')
+utcmm = utctime.strftime('%m').to_i
+utcdd = utctime.strftime('%d').to_i
+YYYYMMDD = format('%<yyyy>4.4d/%<mm>2.2d/%<dd>2.2d', yyyy: utcyyyy, mm: utcmm, dd: utcdd)
 YYYY_MM_DD = YYYYMMDD.gsub("/", "-")
 YYYY_MM_DD_YYYY_MM_DD = "#{YYYY_MM_DD}-#{YYYY_MM_DD}"
 # Create firefox-sumo-emoji-barcode/yyyy/mm/dd directory if it doesn't exist
@@ -51,15 +50,19 @@ CSV.new(URI.parse(CSV_URL).open, :headers => :first_row).each do |q|
   q = q.to_hash
   q["created"] = Time.parse(q["created"]).to_i
   questions.push(q.slice(*PARAMS_TO_KEEP))
-  binding.pry
 end
+exit if questions.length.zero?
+questions.sort! { |a, b| a['created'] <=> b['created'] }
+questions.reject! { |p| p['created'] < startdate }
+
+
 binding.pry
 
 # Get last photo and figure out the date for the Pacific timezone
 # and skip prior dates (if there are any)
 last = photos[-1]
 
-startdate = tz.local_time(localyyyy, localmm, localdd, 0, 0).to_i
+startdate = tz.local_time(localyyyy, utcmm, localdd, 0, 0).to_i
 photos.reject! { |p| p['dateupload'] < startdate }
 exit if photos.length.zero?
 
