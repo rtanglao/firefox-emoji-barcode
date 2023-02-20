@@ -9,7 +9,6 @@ require 'io/console'
 require 'fileutils'
 require 'pry'
 require 'pry-byebug'
-require 'json'
 require 'rmagick'
 require 'unicode/name'
 
@@ -22,15 +21,6 @@ xml_entity = ARGV[0].codepoints.map { |cp| format('&#x%x;', cp) }.join
 filename_xml_entity = xml_entity.gsub(/[&#;]/, '')   
 filename_emoji_readable = Unicode::Name.readable(ARGV[0]).gsub(' ', '-')
 filename = "#{filename_xml_entity}-#{filename_emoji_readable}.png"
-print "#{filename}\n"
+logger.debug "filename: #{filename}"
 image = Magick::Image.read("pango:#{xml_entity}").first
 image.write(filename)
-#'❓'.codepoints.map { |cp| format('&#x%x;', cp) }.join
-# => "&#x2753;"
-# https://www.compart.com/en/unicode/search?q=question#characters
-# `emoj question`
-# Unicode::Name.of "🤳" 
-# => "SELFIE"
-# Unicode::Name.readable("🤳")
-# => "SELFIE"
-
