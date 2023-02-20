@@ -32,6 +32,8 @@ utcdd = utctime.strftime('%d').to_i
 YYYYMMDD = format('%<yyyy>4.4d/%<mm>2.2d/%<dd>2.2d', yyyy: utcyyyy, mm: utcmm, dd: utcdd)
 YYYY_MM_DD = YYYYMMDD.gsub("/", "-")
 YYYY_MM_DD_YYYY_MM_DD = "#{YYYY_MM_DD}-#{YYYY_MM_DD}"
+startdate = Time.gm(utcyyyy, utcmm, utcdd, 0, 0).to_i
+
 # Create firefox-sumo-emoji-barcode/yyyy/mm/dd directory if it doesn't exist
 BARCODE_NAME = 'firefox-sumo-emoji-barcode'
 DIRECTORY = "#{BARCODE_NAME}/#{YYYYMMDD}"
@@ -57,16 +59,8 @@ questions.sort! { |a, b| a['created'] <=> b['created'] }
 binding.pry
 
 questions.reject! { |p| p['created'] < startdate }
+binding.pry
 
-
-
-# Get last photo and figure out the date for the Pacific timezone
-# and skip prior dates (if there are any)
-last = photos[-1]
-
-startdate = tz.local_time(localyyyy, utcmm, localdd, 0, 0).to_i
-photos.reject! { |p| p['dateupload'] < startdate }
-exit if photos.length.zero?
 
 photos.each do |photo|
   id = photo['id']
