@@ -55,16 +55,19 @@ CSV.new(URI.parse(CSV_URL).open, :headers => :first_row).each do |q|
   questions.push(q.slice(*PARAMS_TO_KEEP))
 end
 exit if questions.length.zero?
-questions.sort! { |a, b| a['created'] <=> b['created'] }
-binding.pry
-
 questions.reject! { |p| p['created'] < startdate }
+questions.sort! { |a, b| a['created'] <=> b['created'] }
+
 binding.pry
 
 "❓".codepoints.map { |cp| format('&#x%x;', cp) }.join
 # => "&#x2753;"
 # https://www.compart.com/en/unicode/search?q=question#characters
 # `emoj question`
+# Unicode::Name.of "🤳" 
+# => "SELFIE"
+# Unicode::Name.readable("🤳")
+# => "SELFIE"
 
 photos.each do |photo|
   id = photo['id']
