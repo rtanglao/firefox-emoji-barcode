@@ -26,7 +26,6 @@ if ARGV.length < 2
 end
 
 BACKGROUND_COLOUR = ARGV[1]
-binding.pry
 xml_entity = ARGV[0].codepoints.map { |cp| format('&#x%x;', cp) }.join
 filename_xml_entity = xml_entity.gsub(/[&#;]/, '')
 filename_emoji_readable = Unicode::Name.readable(ARGV[0]).gsub(' ', '-')
