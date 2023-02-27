@@ -6,5 +6,5 @@ Daily Firefox Emoji barcode from support.mozilla.org (SUMO) Firefox Desktop supp
 * The following creates: `x2753-BLACK-QUESTION-MARK-ORNAMENT.png`
 ```bash
 cd EMOJI_PNG
-./createEmojiPNG.rb '❓'
+./createEmojiPNG.rb '❓' '313695'
 ``` 
