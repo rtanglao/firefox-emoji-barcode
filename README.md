@@ -7,8 +7,8 @@ Daily Firefox Emoji barcode from support.mozilla.org (SUMO) Firefox Desktop supp
 ```bash
 cd EMOJI_PNG
 ../createEmojiPNG.rb '🪟' 'a50026'
-../createEmojiPNG.rb '🐧 'a50026'
-../createEmojiPNG.rb '🍎 'a50026'
+../createEmojiPNG.rb '🐧'a50026'
+../createEmojiPNG.rb '🍎'a50026'
 ../createEmojiPNG.rb '❓' 'a50026'
 ```
 
