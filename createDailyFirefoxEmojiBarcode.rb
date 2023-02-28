@@ -83,6 +83,8 @@ FileUtils.mkdir_p DIRECTORY
 processed_ids = []
 processed_ids = IO.readlines(ID_FILEPATH).map(&:to_i) if File.exist?(ID_FILEPATH)
 
+logger.debug "processed_ids: #{processed_ids}"
+
 # If the CSV_URL doesn't exist then exit because there's no way to recover
 begin
   CSV_URL = format("https://raw.githubusercontent.com/rtanglao/rt-kits-api3/main/\
@@ -104,7 +106,12 @@ question_file = '/tmp/question.png'
 logger.debug "date: #{YYYY_MM_DD} #of questions: #{questions.length}"
 questions.each do |q|
   id = q['id']
-  next if processed_ids.include?(id)
+  id_int = id.to_i
+  logger.debug "id: #{id_int}"
+  if processed_ids.include?(id_int)
+    logger.debug "NOT processing id: #{id_int}"
+    next
+  end
 
   check_question_image_exists = true
   os_emoji = Image.read(get_os_emoji_filename(q['tags'])).first
@@ -137,6 +144,6 @@ questions.each do |q|
   # After the question is processed and barcode updated,  add the id to the file and to the array
   # so we don't download it again!
   File.open(ID_FILEPATH, 'a') { |f| f.write("#{id}\n") }
-  processed_ids.push(id)
+  processed_ids.push(id_int)
   FileUtils.cp(DAILY_BARCODE_FILEPATH, BARCODE_FILEPATH)
 end
