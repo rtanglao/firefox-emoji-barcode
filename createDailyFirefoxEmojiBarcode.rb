@@ -131,7 +131,7 @@ questions.each do |q|
       check_daily_file_exists = false
     end
   else
-    image_list = Magick::ImageList.new(question_file, DAILY_BARCODE_FILEPATH)
+    image_list = Magick::ImageList.new(DAILY_BARCODE_FILEPATH, question_file)
     montaged_images = image_list.append(false) #append horizontally i.e. false
     montaged_images.write(DAILY_BARCODE_FILEPATH)
   end
