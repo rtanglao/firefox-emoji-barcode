@@ -67,7 +67,6 @@ utcyyyy = utctime.strftime('%Y').to_i
 utcyyyy_str = utctime.strftime('%Y')
 utcmm = utctime.strftime('%m').to_i
 utcdd = utctime.strftime('%d').to_i
-utcdd = 27 # FIXME, i.e. delete
 YYYYMMDD = format('%<yyyy>4.4d/%<mm>2.2d/%<dd>2.2d', yyyy: utcyyyy, mm: utcmm, dd: utcdd)
 YYYY_MM_DD = YYYYMMDD.gsub('/', '-')
 YYYY_MM_DD_YYYY_MM_DD = "#{YYYY_MM_DD}-#{YYYY_MM_DD}"
