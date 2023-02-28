@@ -23,6 +23,17 @@ include Magick
 logger = Logger.new($stderr)
 logger.level = Logger::DEBUG
 
+def get_os_emoji_filename(tags)
+  case q['tags']
+  when /mac-os|os-x|osx|macos/i
+    MACOS_EMOJI
+  when /linux|ubuntu|redhat|debian/i
+    LINUX_EMOJI
+  when /windows-7|windows-8|windows-10|windows-11|windows/i
+    WINDOWS_EMOJI
+  else
+    UNKNOWNOS_EMOJI
+  end
 PARAMS_TO_KEEP = %w[id created title content tags]
 utctime = Time.now.utc
 utcyyyy = utctime.strftime('%Y').to_i
@@ -70,18 +81,7 @@ questions.each do |q|
   id = q['id']
   next if processed_ids.include?(id)
 
-  os_emoji_filename =
-    case q['tags']
-    when /mac-os|os-x|osx|macos/i
-      MACOS_EMOJI
-    when /linux|ubuntu|redhat|debian/i
-      LINUX_EMOJI
-    when /windows-7|windows-8|windows-10|windows-11|windows/i
-      WINDOWS_EMOJI
-    else
-      UNKNOWNOS_EMOJI
-    end
-  os_emoji = Image.read(os_emoji_filename).first
+  os_emoji = Image.read(get_os_emoji_filename(q['tags'])).first
   binding.pry
 
   if check_file_exists
