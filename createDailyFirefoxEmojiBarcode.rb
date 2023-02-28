@@ -101,15 +101,14 @@ exit if questions.length.zero?
 questions.reject! { |p| p['created'] < startdate }
 questions.sort! { |a, b| a['created'] <=> b['created'] }
 check_daily_file_exists = true
-
 question_file = '/tmp/question.png'
+logger.debug "date: #{YYYY_MM_DD} #of questions: #{questions.length}"
 questions.each do |q|
   id = q['id']
   next if processed_ids.include?(id)
 
   check_question_image_exists = true
   os_emoji = Image.read(get_os_emoji_filename(q['tags'])).first
-  binding.pry
   if check_question_image_exists
     check_question_image_exists = false
     FileUtils.cp(os_emoji.filename, question_file)
@@ -118,8 +117,6 @@ questions.each do |q|
     appended_images = image_list.append(true)
     montaged_images.write(question_file)
   end
-  binding.pry
-
   # Add id image
   id_filename = create_digit_image(id)
 
@@ -138,7 +135,6 @@ questions.each do |q|
     montaged_images = image_list.append(false) #append horizontally i.e. false
     montaged_images.write(DAILY_BARCODE_FILEPATH)
   end
-  binding.pry
   # After the question is processed and barcode updated,  add the id to the file and to the array
   # so we don't download it again!
   File.open(ID_FILEPATH, 'a') { |f| f.write("#{id}\n") }
