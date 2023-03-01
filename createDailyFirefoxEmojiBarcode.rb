@@ -42,6 +42,17 @@ def get_os_emoji_filename(tags)
   end
 end
 
+SYNC_EMOJI ="#{EMOJI_FILEPATH}x1f504-ANTICLOCKWISE-DOWNWARDS-AND-UPWARDS-OPEN-CIRCLE-ARROWS-d73027.png"
+UNKNOWNSYNC_EMOJI ="#{EMOJI_FILEPATH}xd8-LATIN-CAPITAL-LETTER-O-WITH-STROKE-d73027.png"
+def get_sync_emoji_filename(tags)
+  case tags
+  when /sync/i
+    SYNC_EMOJI
+  else
+    UNKNOWNSYNC_EMOJI
+  end
+end
+
 ID_DIGIT_FILENAME = '/tmp/digit.png'
 ID_FILENAME = '/tmp/id.png'
 
@@ -106,6 +117,7 @@ question_file = '/tmp/question.png'
 logger.debug "date: #{YYYY_MM_DD} #of questions: #{questions.length}"
 questions.each do |q|
   id = q['id']
+  tags = q['tags']
   id_int = id.to_i
   logger.debug "id: #{id_int}"
   if processed_ids.include?(id_int)
@@ -114,15 +126,25 @@ questions.each do |q|
   end
 
   check_question_image_exists = true
-  os_emoji = Image.read(get_os_emoji_filename(q['tags'])).first
+  os_emoji = Image.read(get_os_emoji_filename(tags)).first
   if check_question_image_exists
     check_question_image_exists = false
     FileUtils.cp(os_emoji.filename, question_file)
   else
     image_list = Magick::ImageList.new(os_emoji.filename, question_file)
     appended_images = image_list.append(true)
-    montaged_images.write(question_file)
+    appendedimages.write(question_file)
   end
+
+  # Append the Firefox Sync message if tagged 'sync'
+  sync_emoji = Image.read(get_sync_emoji_filename(tags)).first
+  unless sync_emoji.nil?
+    image_list = Magick::ImageList.new(sync_emoji.filename, question_file)
+    appended_images = image_list.append(true)
+    appended_images.write(question_file)
+  end
+
+
   # Add id image
   id_filename = create_digit_image(id)
   logger.debug "created image for id:#{id}"
@@ -133,6 +155,7 @@ questions.each do |q|
   appended_images.write(question_file)
   logger.debug "appended id image to question: #{id}"
 
+  # Append the question image to the daily barcode image
   if check_daily_file_exists
     check_daily_file_exists = false
     unless File.exist?(DAILY_BARCODE_FILEPATH)
