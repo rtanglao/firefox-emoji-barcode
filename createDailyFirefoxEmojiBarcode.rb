@@ -53,7 +53,7 @@ def create_digit_image(id)
     else
       digit_image.write(ID_DIGIT_FILENAME)
       image_list = Magick::ImageList.new(ID_DIGIT_FILENAME, ID_FILENAME)
-      # `true`` means append vertically instead of horizontally
+      # `true` means append vertically instead of horizontally
       appended_images = image_list.append(true)
       appended_images.write(ID_FILENAME)
     end
@@ -125,11 +125,13 @@ questions.each do |q|
   end
   # Add id image
   id_filename = create_digit_image(id)
+  logger.debug "created image for id:#{id}"
 
   # Append the id image to the question image
   image_list = Magick::ImageList.new(ID_FILENAME, question_file)
   appended_images = image_list.append(true)
   appended_images.write(question_file)
+  logger.debug "appended id image to question: #{id}"
 
   if check_daily_file_exists
     unless File.exist?(DAILY_BARCODE_FILEPATH)
@@ -138,8 +140,9 @@ questions.each do |q|
     end
   else
     image_list = Magick::ImageList.new(DAILY_BARCODE_FILEPATH, question_file)
-    montaged_images = image_list.append(false) #append horizontally i.e. false
+    montaged_images = image_list.append(false) # append horizontally i.e. false
     montaged_images.write(DAILY_BARCODE_FILEPATH)
+    logger.debug "wrote image with id:#{id} to #{DAILY_BARCODE_FILEPATH}"
   end
   # After the question is processed and barcode updated,  add the id to the file and to the array
   # so we don't download it again!
