@@ -134,11 +134,13 @@ questions.each do |q|
   logger.debug "appended id image to question: #{id}"
 
   if check_daily_file_exists
+    check_daily_file_exists = false
     unless File.exist?(DAILY_BARCODE_FILEPATH)
+      logger.debug("#{DAILY_BARCODE_FILEPATH} does not exist, so copying: #{question_file} to it")
       FileUtils.cp(question_file, DAILY_BARCODE_FILEPATH)
-      check_daily_file_exists = false
     end
   else
+    logger.debug("#{DAILY_BARCODE_FILEPATH} DOES exist, so appending: #{question_file} to it")
     image_list = Magick::ImageList.new(DAILY_BARCODE_FILEPATH, question_file)
     montaged_images = image_list.append(false) # append horizontally i.e. false
     montaged_images.write(DAILY_BARCODE_FILEPATH)
