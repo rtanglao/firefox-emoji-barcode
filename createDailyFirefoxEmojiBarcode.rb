@@ -76,7 +76,7 @@ def get_topic_emoji_filename(topic)
   when /install/i
     DOWNLOAD_INSTALL_MIGRATION_EMOJI
   else
-    UNKNOWNSYNC_EMOJI
+    OTHER_EMOJI
   end
 end
 
