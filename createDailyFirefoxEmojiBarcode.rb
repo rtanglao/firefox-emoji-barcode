@@ -42,7 +42,7 @@ def get_os_emoji_filename(tags)
   end
 end
 
-SYNC_EMOJI ="#{EMOJI_FILEPATH}x1f504-ANTICLOCKWISE-DOWNWARDS-AND-UPWARDS-OPEN-CIRCLE-ARROWS-d73027.png"
+SYNC_EMOJI = "#{EMOJI_FILEPATH}x1f504-ANTICLOCKWISE-DOWNWARDS-AND-UPWARDS-OPEN-CIRCLE-ARROWS-d73027.png"
 BOOKMARK_EMOJI = "#{EMOJI_FILEPATH}x1f516-BOOKMARK-d73027.png"
 DOWNLOAD_INSTALL_MIGRATION_EMOJI = "#{EMOJI_FILEPATH}x1f53d-DOWN-POINTING-SMALL-RED-TRIANGLE-d73027.png"
 PRIVACY_SECURITY_EMOJI = "#{EMOJI_FILEPATH}x1f6e1-SHIELD-d73027.png"
@@ -52,7 +52,7 @@ TIPS_TRICKS_EMOJI = "#{EMOJI_FILEPATH}x2139xfe0f-INFORMATION-SOURCE-d73027.png"
 COOKIES_EMOJI = "#{EMOJI_FILEPATH}x1f36a-COOKIE-d73027.png"
 TABS_EMOJI = "#{EMOJI_FILEPATH}x1f4d1-BOOKMARK-TABS-d73027.png"
 WEBSITE_BREAKAGES_EMOJI = "#{EMOJI_FILEPATH}x1f494-BROKEN-HEART-d73027.png"
-OTHER_EMOJI ="#{EMOJI_FILEPATH}xd8-LATIN-CAPITAL-LETTER-O-WITH-STROKE-d73027.png"
+OTHER_EMOJI = "#{EMOJI_FILEPATH}xd8-LATIN-CAPITAL-LETTER-O-WITH-STROKE-d73027.png"
 def get_topic_emoji_filename(topic)
   case topic
   when /sync/i
@@ -86,7 +86,7 @@ ID_FILENAME = '/tmp/id.png'
 def create_digit_image(id)
   id.chars.reverse.each_with_index do |d, i|
     digit_image = Magick::Image.read("pango:#{d}").first
-    if i.zero? 
+    if i.zero?
       digit_image.write(ID_FILENAME)
     else
       digit_image.write(ID_DIGIT_FILENAME)
@@ -139,7 +139,7 @@ end
 exit if questions.length.zero?
 questions.reject! { |p| p['created'] < startdate }
 questions.sort! { |a, b| a['created'] <=> b['created'] }
-check_daily_file_exists = true
+daily_file_exists = false
 question_file = '/tmp/question.png'
 logger.debug "date: #{YYYY_MM_DD} #of questions: #{questions.length}"
 questions.each do |q|
@@ -183,18 +183,18 @@ questions.each do |q|
   logger.debug "appended id image to question: #{id}"
 
   # Append the question image to the daily barcode image
-  if check_daily_file_exists
-    check_daily_file_exists = false
-    unless File.exist?(DAILY_BARCODE_FILEPATH)
-      logger.debug("#{DAILY_BARCODE_FILEPATH} does not exist, so copying: #{question_file} to it")
-      FileUtils.cp(question_file, DAILY_BARCODE_FILEPATH)
-    end
-  else
+  if daily_file_exists || File.exist?(DAILY_BARCODE_FILEPATH)
+    logger.debug "daily file EXISTS for: #{DAILY_BARCODE_FILEPATH}"
     logger.debug("#{DAILY_BARCODE_FILEPATH} DOES exist, so appending: #{question_file} to it")
     image_list = Magick::ImageList.new(DAILY_BARCODE_FILEPATH, question_file)
     montaged_images = image_list.append(false) # append horizontally i.e. false
     montaged_images.write(DAILY_BARCODE_FILEPATH)
     logger.debug "wrote image with id:#{id} to #{DAILY_BARCODE_FILEPATH}"
+    daily_file_exists = true
+  else
+    check_daily_file_exists = true
+    logger.debug("#{DAILY_BARCODE_FILEPATH} does not exist, so copying: #{question_file} to it")
+    FileUtils.cp(question_file, DAILY_BARCODE_FILEPATH)
   end
   # After the question is processed and barcode updated,  add the id to the file and to the array
   # so we don't download it again!
