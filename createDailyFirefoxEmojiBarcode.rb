@@ -43,11 +43,38 @@ def get_os_emoji_filename(tags)
 end
 
 SYNC_EMOJI ="#{EMOJI_FILEPATH}x1f504-ANTICLOCKWISE-DOWNWARDS-AND-UPWARDS-OPEN-CIRCLE-ARROWS-d73027.png"
-UNKNOWNSYNC_EMOJI ="#{EMOJI_FILEPATH}xd8-LATIN-CAPITAL-LETTER-O-WITH-STROKE-d73027.png"
-def get_sync_emoji_filename(tags)
-  case tags
+BOOKMARK_EMOJI = "#{EMOJI_FILEPATH}x1f516-BOOKMARK-d73027.png"
+DOWNLOAD_INSTALL_MIGRATION_EMOJI = "#{EMOJI_FILEPATH}x1f53d-DOWN-POINTING-SMALL-RED-TRIANGLE-d73027.png"
+PRIVACY_SECURITY_EMOJI = "#{EMOJI_FILEPATH}x1f6e1-SHIELD-d73027.png"
+CUSTOMIZE_CONTROLS_OPTIONS_ADDONS_EMOJI = "#{EMOJI_FILEPATH}x1f50c-ELECTRIC-PLUG-d73027.png"
+SLOWNESS_CRASHING_ERROR_MESSAGES_OTHER_PROBLEMS_EMJOI = "#{EMOJI_FILEPATH}x1f4a5-COLLISION-SYMBOL-d73027.png"
+TIPS_TRICKS_EMOJI = "#{EMOJI_FILEPATH}x2139xfe0f-INFORMATION-SOURCE-d73027.png"
+COOKIES_EMOJI = "#{EMOJI_FILEPATH}x1f36a-COOKIE-d73027.png"
+TABS_EMOJI = "#{EMOJI_FILEPATH}x1f4d1-BOOKMARK-TABS-d73027.png"
+WEBSITE_BREAKAGES_EMOJI = "#{EMOJI_FILEPATH}x1f494-BROKEN-HEART-d73027.png"
+OTHER_EMOJI ="#{EMOJI_FILEPATH}xd8-LATIN-CAPITAL-LETTER-O-WITH-STROKE-d73027.png"
+def get_topic_emoji_filename(topic)
+  case topic
   when /sync/i
     SYNC_EMOJI
+  when /bookmark/i
+    BOOKMARK_EMOJI
+  when /tab/i
+    TABS_EMOJI
+  when /problems/i
+    SLOWNESS_CRASHING_ERROR_MESSAGES_OTHER_PROBLEMS_EMJOI
+  when /customize/i
+    CUSTOMIZE_CONTROLS_OPTIONS_ADDONS_EMOJI
+  when /tricks/i
+    TIPS_TRICKS_EMOJI
+  when /tab/i
+    TABS_EMOJI
+  when /breakage/i
+    WEBSITE_BREAKAGES_EMOJI
+  when /privacy/i
+    PRIVACY_SECURITY_EMOJI
+  when /install/i
+    DOWNLOAD_INSTALL_MIGRATION_EMOJI
   else
     UNKNOWNSYNC_EMOJI
   end
@@ -72,7 +99,7 @@ def create_digit_image(id)
   ID_FILENAME
 end
 
-PARAMS_TO_KEEP = %w[id created title content tags]
+PARAMS_TO_KEEP = %w[id created title content tags topic]
 utctime = Time.now.utc
 utcyyyy = utctime.strftime('%Y').to_i
 utcyyyy_str = utctime.strftime('%Y')
@@ -118,6 +145,7 @@ logger.debug "date: #{YYYY_MM_DD} #of questions: #{questions.length}"
 questions.each do |q|
   id = q['id']
   tags = q['tags']
+  topic = q['topic']
   id_int = id.to_i
   logger.debug "id: #{id_int}"
   if processed_ids.include?(id_int)
@@ -136,14 +164,13 @@ questions.each do |q|
     appendedimages.write(question_file)
   end
 
-  # Append the Firefox Sync message if tagged 'sync'
-  sync_emoji = Image.read(get_sync_emoji_filename(tags)).first
-  unless sync_emoji.nil?
-    image_list = Magick::ImageList.new(sync_emoji.filename, question_file)
+  # Append the topic emoji
+  topic_emoji = Image.read(get_topic_emoji_filename(topic)).first
+  unless topic_emoji.nil?
+    image_list = Magick::ImageList.new(topic_emoji.filename, question_file)
     appended_images = image_list.append(true)
     appended_images.write(question_file)
   end
-
 
   # Add id image
   id_filename = create_digit_image(id)
