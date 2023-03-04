@@ -124,17 +124,18 @@ processed_ids = IO.readlines(ID_FILEPATH).map(&:to_i) if File.exist?(ID_FILEPATH
 logger.debug "processed_ids: #{processed_ids}"
 
 # If the CSV_URL doesn't exist then exit because there's no way to recover
-begin
   CSV_URL = format("https://raw.githubusercontent.com/rtanglao/rt-kits-api3/main/\
 #{utcyyyy_str}/#{YYYY_MM_DD_YYYY_MM_DD}-firefox-creator-answers-desktop-all-locales.csv")
+questions = []
+begin
+  CSV.new(URI.parse(CSV_URL).open, headers: :first_row).each do |q|
+    q = q.to_hash
+    q['created'] = Time.parse(q['created']).to_i
+    questions.push(q.slice(*PARAMS_TO_KEEP))
+  end
 rescue StandardError => e
   logger.debug "Can't read CSV:#{CSV_URL} exception:#{e}"
-end
-questions = []
-CSV.new(URI.parse(CSV_URL).open, headers: :first_row).each do |q|
-  q = q.to_hash
-  q['created'] = Time.parse(q['created']).to_i
-  questions.push(q.slice(*PARAMS_TO_KEEP))
+  exit
 end
 exit if questions.length.zero?
 questions.reject! { |p| p['created'] < startdate }
@@ -192,7 +193,7 @@ questions.each do |q|
     logger.debug "wrote image with id:#{id} to #{DAILY_BARCODE_FILEPATH}"
     daily_file_exists = true
   else
-    check_daily_file_exists = true
+    daily_file_exists = true
     logger.debug("#{DAILY_BARCODE_FILEPATH} does not exist, so copying: #{question_file} to it")
     FileUtils.cp(question_file, DAILY_BARCODE_FILEPATH)
   end
