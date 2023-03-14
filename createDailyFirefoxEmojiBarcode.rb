@@ -90,7 +90,6 @@ def get_firefox_version_beta_tag(tags)
   firefox_version_tag = tags_array.select { |x| x.include?('firefox') }.max_by(&:length)
   return UNKNOWN_EMOJI if firefox_version_tag.nil?
 
-  binding.pry
   firefox_version_tag = "#{firefox_version_tag} beta" if tags_array.include?('beta')
   version_plus_beta_image = Magick::Image.read("pango:#{firefox_version_tag}").first
   version_plus_beta_image.write(VERSION_PLUS_BETA_FILENAME)
@@ -170,12 +169,15 @@ questions.each do |q|
     next
   end  
 
-  # Append the os emoji
+  # Append the os emoji to a nil image
   os_emoji = Image.read(get_os_emoji_filename(tags)).first
   FileUtils.cp(os_emoji.filename, question_file)
 
   # Append the Firefox version emoji + beta if they exist
   version_emoji = get_firefox_version_beta_tag(tags)
+  image_list = Magick::ImageList.new(version_emoji, question_file)
+  appended_images = image_list.append(true)
+  appended_images.write(question_file)
 
   # Append the topic emoji
   topic_emoji = Image.read(get_topic_emoji_filename(topic)).first
