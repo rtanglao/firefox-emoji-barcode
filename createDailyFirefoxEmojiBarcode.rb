@@ -188,7 +188,7 @@ questions.each do |q|
     appended_images.write(question_file)
   end
 
-  # Append the bugilla image if bug tags exist
+  # Append the bugilla bug image if bug tags exist
 
   # Append the rest of the emojis if they exist
   # content = "#{q['title']} #{Nokogiri::HTML(q['content']).text}"
