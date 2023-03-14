@@ -91,7 +91,7 @@ def get_firefox_version_beta_tag(tags)
   return UNKNOWN_EMOJI if firefox_version_tag.nil?
   firefox_version_tag = firefox_version_tag.delete_prefix('firefox-')
 
-  firefox_version_tag = "#{firefox_version_tag} beta" if tags_array.include?('beta')
+  firefox_version_tag = "#{firefox_version_tag}ß" if tags_array.include?('beta')
   version_plus_beta_image = Magick::Image.read("pango:#{firefox_version_tag}").first
   version_plus_beta_image.write(VERSION_PLUS_BETA_FILENAME)
   VERSION_PLUS_BETA_FILENAME
