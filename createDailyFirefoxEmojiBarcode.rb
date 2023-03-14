@@ -27,7 +27,7 @@ EMOJI_FILEPATH = 'EMOJI_PNG/'
 MACOS_EMOJI = "#{EMOJI_FILEPATH}x1f34e-RED-APPLE-a50026.png"
 WINDOWS_EMOJI = "#{EMOJI_FILEPATH}x1fa9f-WINDOW-a50026.png"
 LINUX_EMOJI = "#{EMOJI_FILEPATH}x1f427-PENGUIN-a50026.png"
-UNKNOWNOS_EMOJI = "#{EMOJI_FILEPATH}x2753-BLACK-QUESTION-MARK-ORNAMENT-a50026.png"
+UNKNOWN_EMOJI = "#{EMOJI_FILEPATH}x2753-BLACK-QUESTION-MARK-ORNAMENT-a50026.png"
 
 def get_os_emoji_filename(tags)
   case tags
@@ -38,7 +38,7 @@ def get_os_emoji_filename(tags)
   when /windows-7|windows-8|windows-10|windows-11|windows/i
     WINDOWS_EMOJI
   else
-    UNKNOWNOS_EMOJI
+    UNKNOWN_EMOJI
   end
 end
 
@@ -53,6 +53,7 @@ COOKIES_EMOJI = "#{EMOJI_FILEPATH}x1f36a-COOKIE-d73027.png"
 TABS_EMOJI = "#{EMOJI_FILEPATH}x1f4d1-BOOKMARK-TABS-d73027.png"
 WEBSITE_BREAKAGES_EMOJI = "#{EMOJI_FILEPATH}x1f494-BROKEN-HEART-d73027.png"
 OTHER_EMOJI = "#{EMOJI_FILEPATH}xd8-LATIN-CAPITAL-LETTER-O-WITH-STROKE-d73027.png"
+
 def get_topic_emoji_filename(topic)
   case topic
   when /sync/i
@@ -80,6 +81,22 @@ def get_topic_emoji_filename(topic)
   end
 end
 
+VERSION_PLUS_BETA_FILENAME = '/tmp/version_plus_beta.png'
+
+def get_firefox_version_beta_tag(tags)
+  tags_array = tags.split(';')
+  return UNKNOWN_EMOJI if tags_array.nil?
+
+  firefox_version_tag = tags_array.select { |x| x.include?('firefox') }.max_by(&:length)
+  return UNKNOWN_EMOJI if firefox_version_tag.nil?
+
+  binding.pry
+  firefox_version_tag = "#{firefox_version_tag} beta" if tags_array.include?('beta')
+  version_plus_beta_image = Magick::Image.read("pango:#{firefox_version_tag}").first
+  version_plus_beta_image.write(VERSION_PLUS_BETA_FILENAME)
+  VERSION_PLUS_BETA_FILENAME
+end
+
 ID_DIGIT_FILENAME = '/tmp/digit.png'
 ID_FILENAME = '/tmp/id.png'
 
@@ -96,7 +113,6 @@ def create_digit_image(id)
       appended_images.write(ID_FILENAME)
     end
   end
-  ID_FILENAME
 end
 
 PARAMS_TO_KEEP = %w[id created title content tags topic]
@@ -124,7 +140,7 @@ processed_ids = IO.readlines(ID_FILEPATH).map(&:to_i) if File.exist?(ID_FILEPATH
 logger.debug "processed_ids: #{processed_ids}"
 
 # If the CSV_URL doesn't exist then exit because there's no way to recover
-  CSV_URL = format("https://raw.githubusercontent.com/rtanglao/rt-kits-api3/main/\
+CSV_URL = format("https://raw.githubusercontent.com/rtanglao/rt-kits-api3/main/\
 #{utcyyyy_str}/#{YYYY_MM_DD_YYYY_MM_DD}-firefox-creator-answers-desktop-all-locales.csv")
 questions = []
 begin
@@ -152,18 +168,14 @@ questions.each do |q|
   if processed_ids.include?(id_int)
     logger.debug "NOT processing id: #{id_int}"
     next
-  end
+  end  
 
-  check_question_image_exists = true
+  # Append the os emoji
   os_emoji = Image.read(get_os_emoji_filename(tags)).first
-  if check_question_image_exists
-    check_question_image_exists = false
-    FileUtils.cp(os_emoji.filename, question_file)
-  else
-    image_list = Magick::ImageList.new(os_emoji.filename, question_file)
-    appended_images = image_list.append(true)
-    appendedimages.write(question_file)
-  end
+  FileUtils.cp(os_emoji.filename, question_file)
+
+  # Append the Firefox version emoji + beta if they exist
+  version_emoji = get_firefox_version_beta_tag(tags)
 
   # Append the topic emoji
   topic_emoji = Image.read(get_topic_emoji_filename(topic)).first
@@ -173,8 +185,12 @@ questions.each do |q|
     appended_images.write(question_file)
   end
 
+  # Append the bugilla image if bug tags exist
+
+  # Append the rest of the emojis if they exist
+  # content = "#{q['title']} #{Nokogiri::HTML(q['content']).text}"
   # Add id image
-  id_filename = create_digit_image(id)
+  create_digit_image(id)
   logger.debug "created image for id:#{id}"
 
   # Append the id image to the question image
