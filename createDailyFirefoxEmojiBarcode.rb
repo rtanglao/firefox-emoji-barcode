@@ -89,8 +89,8 @@ def get_firefox_version_beta_tag(tags)
 
   firefox_version_tag = tags_array.select { |x| x.include?('firefox') }.max_by(&:length)
   return UNKNOWN_EMOJI if firefox_version_tag.nil?
-  firefox_version_tag = firefox_version_tag.delete_prefix('firefox-')
 
+  firefox_version_tag = firefox_version_tag.delete_prefix('firefox-')
   firefox_version_tag = "#{firefox_version_tag}ß" if tags_array.include?('beta')
   version_plus_beta_image = Magick::Image.read("pango:#{firefox_version_tag}").first
   version_plus_beta_image.write(VERSION_PLUS_BETA_FILENAME)
@@ -116,12 +116,28 @@ def create_digit_image(id)
 end
 
 PARAMS_TO_KEEP = %w[id created title content tags topic]
-utctime = Time.now.utc
-utcyyyy = utctime.strftime('%Y').to_i
-utcyyyy_str = utctime.strftime('%Y')
-utcmm = utctime.strftime('%m').to_i
-utcdd = utctime.strftime('%d').to_i
+arg_count = ARGV.length
+if arg_count != 0 && arg_count != 3
+  puts "usage: #{$0} # to get current date's barcode OR"
+  puts "usage: #{$0} <yyyy> <mm> <dd> # to get a specific date"
+  exit
+end
+
+if arg_count.zero?
+  utctime = Time.now.utc
+  utcyyyy = utctime.strftime('%Y').to_i
+  utcyyyy_str = utctime.strftime('%Y')
+  utcmm = utctime.strftime('%m').to_i
+  utcdd = utctime.strftime('%d').to_i
+else
+  utcyyyy = ARGV[0].to_i
+  utcyyyy_str = ARGV[0]
+  utcmm = ARGV[1].to_i
+  utcdd = ARGV[2].to_i
+end
+
 YYYYMMDD = format('%<yyyy>4.4d/%<mm>2.2d/%<dd>2.2d', yyyy: utcyyyy, mm: utcmm, dd: utcdd)
+logger.debug "YYYYMMDD: #{YYYYMMDD}"
 YYYY_MM_DD = YYYYMMDD.gsub('/', '-')
 YYYY_MM_DD_YYYY_MM_DD = "#{YYYY_MM_DD}-#{YYYY_MM_DD}"
 startdate = Time.gm(utcyyyy, utcmm, utcdd, 0, 0).to_i
@@ -168,7 +184,7 @@ questions.each do |q|
   if processed_ids.include?(id_int)
     logger.debug "NOT processing id: #{id_int}"
     next
-  end  
+  end
 
   # Append the os emoji to a nil image
   os_emoji = Image.read(get_os_emoji_filename(tags)).first
@@ -220,5 +236,7 @@ questions.each do |q|
   # so we don't download it again!
   File.open(ID_FILEPATH, 'a') { |f| f.write("#{id}\n") }
   processed_ids.push(id_int)
-  FileUtils.cp(DAILY_BARCODE_FILEPATH, BARCODE_FILEPATH)
+  if arg_count == 0
+    FileUtils.cp(DAILY_BARCODE_FILEPATH, BARCODE_FILEPATH)
+  end # don't copy if we are not doing the current day
 end
