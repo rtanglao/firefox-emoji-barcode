@@ -39,6 +39,7 @@ LINUX_EMOJI = "#{EMOJI_FILEPATH}x1f427-PENGUIN-a50026.png"
 UNKNOWN_EMOJI = "#{EMOJI_FILEPATH}x2753-BLACK-QUESTION-MARK-ORNAMENT-a50026.png"
 KASPERSKY_EMOJI = "#{EMOJI_FILEPATH}kaspersky-20x20.png"
 YAHOO_EMOJI = "#{EMOJI_FILEPATH}yahoo.png"
+CHROME_EMOJI = "#{EMOJI_FILEPATH}chrome.png"
 
 def get_os_emoji_filename(tags)
   case tags
@@ -211,6 +212,7 @@ questions.each do |q|
   content = "#{q['title']} #{Nokogiri::HTML(q['content']).text}".downcase
   append_image(KASPERSKY_EMOJI, question_file, VERTICAL) if content.include?('kaspersky')
   append_image(YAHOO_EMOJI, question_file, VERTICAL) if content.include?('yahoo')
+  append_image(CHROME_EMOJI, question_file, VERTICAL) if content.include?('chrome')
 
   # Add id image
   create_digit_image(id)
