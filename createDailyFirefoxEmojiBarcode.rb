@@ -23,6 +23,14 @@ include Magick
 logger = Logger.new($stderr)
 logger.level = Logger::DEBUG
 
+VERTICAL = true
+HORIZONTAL = false
+def append_image(image_to_be_appended, image, vertical_or_horizontal)
+  image_list = Magick::ImageList.new(image_to_be_appended, image)
+  appended_images = image_list.append(vertical_or_horizontal)
+  appended_images.write(image)
+end
+
 EMOJI_FILEPATH = 'EMOJI_PNG/'
 MACOS_EMOJI = "#{EMOJI_FILEPATH}x1f34e-RED-APPLE-a50026.png"
 WINDOWS_EMOJI = "#{EMOJI_FILEPATH}x1fa9f-WINDOW-a50026.png"
@@ -107,10 +115,7 @@ def create_digit_image(id)
       digit_image.write(ID_FILENAME)
     else
       digit_image.write(ID_DIGIT_FILENAME)
-      image_list = Magick::ImageList.new(ID_DIGIT_FILENAME, ID_FILENAME)
-      # `true` means append vertically instead of horizontally
-      appended_images = image_list.append(true)
-      appended_images.write(ID_FILENAME)
+      append_image(ID_DIGIT_FILENAME, ID_FILENAME, VERTICAL)
     end
   end
 end
@@ -192,17 +197,11 @@ questions.each do |q|
 
   # Append the Firefox version emoji + beta if they exist
   version_emoji = get_firefox_version_beta_tag(tags)
-  image_list = Magick::ImageList.new(version_emoji, question_file)
-  appended_images = image_list.append(true)
-  appended_images.write(question_file)
+  append_image(version_emoji, question_file, VERTICAL)
 
   # Append the topic emoji
   topic_emoji = Image.read(get_topic_emoji_filename(topic)).first
-  unless topic_emoji.nil?
-    image_list = Magick::ImageList.new(topic_emoji.filename, question_file)
-    appended_images = image_list.append(true)
-    appended_images.write(question_file)
-  end
+  append_image(topic_emoji.filename, question_file, VERTICAL) unless topic_emoji.nil?
 
   # Append the bugilla bug image if bug tags exist
 
@@ -213,18 +212,14 @@ questions.each do |q|
   logger.debug "created image for id:#{id}"
 
   # Append the id image to the question image
-  image_list = Magick::ImageList.new(ID_FILENAME, question_file)
-  appended_images = image_list.append(true)
-  appended_images.write(question_file)
+  append_image(ID_FILENAME, question_file, VERTICAL)
   logger.debug "appended id image to question: #{id}"
 
   # Append the question image to the daily barcode image
   if daily_file_exists || File.exist?(DAILY_BARCODE_FILEPATH)
     logger.debug "daily file EXISTS for: #{DAILY_BARCODE_FILEPATH}"
     logger.debug("#{DAILY_BARCODE_FILEPATH} DOES exist, so appending: #{question_file} to it")
-    image_list = Magick::ImageList.new(DAILY_BARCODE_FILEPATH, question_file)
-    montaged_images = image_list.append(false) # append horizontally i.e. false
-    montaged_images.write(DAILY_BARCODE_FILEPATH)
+    append_image(question_file, DAILY_BARCODE_FILEPATH, HORIZONTAL)
     logger.debug "wrote image with id:#{id} to #{DAILY_BARCODE_FILEPATH}"
     daily_file_exists = true
   else
@@ -232,11 +227,10 @@ questions.each do |q|
     logger.debug("#{DAILY_BARCODE_FILEPATH} does not exist, so copying: #{question_file} to it")
     FileUtils.cp(question_file, DAILY_BARCODE_FILEPATH)
   end
-  # After the question is processed and barcode updated,  add the id to the file and to the array
+  # After the question is processed and barcode updated, add the id to the file and to the array
   # so we don't download it again!
   File.open(ID_FILEPATH, 'a') { |f| f.write("#{id}\n") }
   processed_ids.push(id_int)
-  if arg_count == 0
-    FileUtils.cp(DAILY_BARCODE_FILEPATH, BARCODE_FILEPATH)
-  end # don't copy if we are not doing the current day
+  # don't copy to daily barcode if we are not doing the current day
+  FileUtils.cp(DAILY_BARCODE_FILEPATH, BARCODE_FILEPATH) if arg_count.zero?
 end
