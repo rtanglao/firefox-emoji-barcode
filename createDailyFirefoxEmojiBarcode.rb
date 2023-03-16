@@ -17,6 +17,7 @@ require 'json'
 require 'rmagick'
 require 'csv'
 require 'open-uri'
+require 'nokogiri'
 
 include Magick
 
@@ -36,6 +37,8 @@ MACOS_EMOJI = "#{EMOJI_FILEPATH}x1f34e-RED-APPLE-a50026.png"
 WINDOWS_EMOJI = "#{EMOJI_FILEPATH}x1fa9f-WINDOW-a50026.png"
 LINUX_EMOJI = "#{EMOJI_FILEPATH}x1f427-PENGUIN-a50026.png"
 UNKNOWN_EMOJI = "#{EMOJI_FILEPATH}x2753-BLACK-QUESTION-MARK-ORNAMENT-a50026.png"
+KASPERSKY_EMOJI = "#{EMOJI_FILEPATH}kaspersky-20x20.png"
+YAHOO_EMOJI = "#{EMOJI_FILEPATH}yahoo.png"
 
 def get_os_emoji_filename(tags)
   case tags
@@ -204,9 +207,11 @@ questions.each do |q|
   append_image(topic_emoji.filename, question_file, VERTICAL) unless topic_emoji.nil?
 
   # Append the bugilla bug image if bug tags exist
-
   # Append the rest of the emojis if they exist
-  # content = "#{q['title']} #{Nokogiri::HTML(q['content']).text}"
+  content = "#{q['title']} #{Nokogiri::HTML(q['content']).text}".downcase
+  append_image(KASPERSKY_EMOJI, question_file, VERTICAL) if content.include?('kaspersky')
+  append_image(YAHOO_EMOJI, question_file, VERTICAL) if content.include?('yahoo')
+
   # Add id image
   create_digit_image(id)
   logger.debug "created image for id:#{id}"
